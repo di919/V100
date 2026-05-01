@@ -29,7 +29,7 @@ if prompt := st.chat_input("Frag v100 was..."):
     # AI Antwort holen
     with st.chat_message("assistant"):
         stream = client.chat.completions.create(
-            model="llama-3.1-70b-versatile",  # Gratis + krass gut
+            model="llama3-70b-8192",  # NEU: Das aktuelle Gratis-Modell von Groq
             messages=[
                 {"role": m["role"], "content": m["content"]}
                 for m in st.session_state.messages
@@ -37,4 +37,4 @@ if prompt := st.chat_input("Frag v100 was..."):
             stream=True,
         )
         response = st.write_stream(stream)
-    st.session_state.messages.append({"role": "assistant", "content": response})
+    st.session_state.messages
