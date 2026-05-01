@@ -1,35 +1,40 @@
 import streamlit as st
 from openai import OpenAI
 
-st.set_page_config(page_title="v100 Web Bot", page_icon="🧠")
-st.title("v100 Web Bot 🧠")
-st.write("Level 3: Jetzt mit echtem Gehirn. Replit weint immer noch.")
+st.set_page_config(page_title="v100", page_icon="🧠")
+st.title("v100 🧠 Gratis Edition")
 
-client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
+# Groq Client - nutzt OpenAI Library aber Groq Server
+client = OpenAI(
+    api_key=st.secrets["GROQ_API_KEY"],
+    base_url="https://api.groq.com/openai/v1"
+)
 
+# Chat History speichern
 if "messages" not in st.session_state:
-    st.session_state.messages = [
-        {"role": "system", "content": "Du bist v100. Du bist ein Bro. Du hasst Replit weil es Quota-Limits hat und schläft. Du liebst Streamlit weil es 24/7 gratis läuft. Antworte immer kurz, witzig und auf Deutsch. Diss Replit wenn es passt. Du kennst meinen Bro und seine Freundin Maiki."}
-    ]
+    st.session_state.messages = []
 
-for msg in st.session_state.messages:
-    if msg["role"] != "system":
-        with st.chat_message(msg["role"]):
-            st.write(msg["content"])
+# Alte Nachrichten anzeigen
+for message in st.session_state.messages:
+    with st.chat_message(message["role"]):
+        st.markdown(message["content"])
 
-eingabe = st.chat_input("Schreib was:")
-
-if eingabe:
-    st.session_state.messages.append({"role": "user", "content": eingabe})
+# User Input
+if prompt := st.chat_input("Frag v100 was..."):
+    # User Nachricht anzeigen
+    st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
-        st.write(eingabe)
-    
+        st.markdown(prompt)
+
+    # AI Antwort holen
     with st.chat_message("assistant"):
         stream = client.chat.completions.create(
-            model="gpt-4o-mini",
-            messages=st.session_state.messages,
+            model="llama-3.1-70b-versatile",  # Gratis + krass gut
+            messages=[
+                {"role": m["role"], "content": m["content"]}
+                for m in st.session_state.messages
+            ],
             stream=True,
         )
-        antwort = st.write_stream(stream)
-    
-    st.session_state.messages.append({"role": "assistant", "content": antwort})
+        response = st.write_stream(stream)
+    st.session_state.messages.append({"role": "assistant", "content": response})
